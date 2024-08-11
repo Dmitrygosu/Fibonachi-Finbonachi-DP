@@ -74,4 +74,5 @@ func main() {
 	durationDp := time.Since(startDp)
 	fmt.Printf("Оптимизированный Фибоначчи (%d): %d, время вычисления: %v\n", n, resultDp, durationDp)
 	printMemUsage()
+	fmt.Scanln(&durationDp)
 }
