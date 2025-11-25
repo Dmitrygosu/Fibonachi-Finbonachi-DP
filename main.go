@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strconv" 
 	"strings"
 	"time"
 )
@@ -17,6 +18,9 @@ func fibonacci(n int) int {
 }
 
 func fibonacciDp(n int) int {
+	if n <= 1 {
+		return n
+	}
 	dp := make([]int, n+1)
 	dp[0] = 0
 	dp[1] = 1
@@ -32,7 +36,7 @@ func printMemUsage() {
 	fmt.Printf("Использование памяти:  %v MiB", bToMb(m.Alloc))
 	fmt.Printf("\tВсего выделено:  %v MiB", bToMb(m.TotalAlloc))
 	fmt.Printf("\tСистемная память:  %v MiB", bToMb(m.Sys))
-	fmt.Printf("\tКоличество сборок мусора:  = %v\n", m.NumGC)
+	fmt.Printf("\tКоличество сборок мусора: = %v\n", m.NumGC)
 }
 
 func bToMb(b uint64) uint64 {
@@ -41,27 +45,33 @@ func bToMb(b uint64) uint64 {
 
 func main() {
 	var n int
-
+	var err error
+	
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		fmt.Println("Введите целое число для вычисления числа Фибоначчи:")
-		_, err := fmt.Scanln(&n)
-		if err != nil {
-			fmt.Println("Ошибка ввода. Пожалуйста, введите целое число.")
-			// Сброс буфера ввода
-			var discard string
-			fmt.Scanln(&discard)
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+		
+		n, err = strconv.Atoi(input) 
+		if err != nil || n < 0 {
+			fmt.Println("Ошибка ввода. Пожалуйста, введите положительное целое число.")
 			continue
 		}
 		break
 	}
 
-	fmt.Println("Хотите использовать неоптимизированный алгоритм Фибоначчи? (да/нет(Enter):")
+	fmt.Println("Хотите использовать неоптимизированный алгоритм Фибоначчи? (да/нет + Enter):")
+	if n > 45 {
+		fmt.Println("(Внимание: при n > 45 это займет очень много времени!)")
+	}
+
 	useUnoptimized, _ := reader.ReadString('\n')
 	useUnoptimized = strings.TrimSpace(strings.ToLower(useUnoptimized))
 
 	if useUnoptimized == "да" {
+		fmt.Println("Запуск рекурсии...")
 		start := time.Now()
 		result := fibonacci(n)
 		duration := time.Since(start)
@@ -74,5 +84,7 @@ func main() {
 	durationDp := time.Since(startDp)
 	fmt.Printf("Оптимизированный Фибоначчи (%d): %d, время вычисления: %v\n", n, resultDp, durationDp)
 	printMemUsage()
-	fmt.Scanln(&durationDp)
+
+	fmt.Println("\nНажмите Enter, чтобы выйти...")
+	reader.ReadString('\n') 
 }
